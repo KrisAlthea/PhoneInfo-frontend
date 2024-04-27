@@ -6,7 +6,9 @@ import {ref} from "vue";
 
 const URL = 'http://localhost:8080/getPhoneInfo'
 const isButtonEnabled = ref(false);
+const isPhoneValid = ref(true);
 const infoVisible = ref(false);
+const isLoading = ref(false);
 const phoneNumber = ref('')
 const phoneInfo = ref({
   carrier: '',
@@ -29,6 +31,11 @@ function checkPhoneNumber() {
   isButtonEnabled.value = phoneNumber.value.length === 11;
 }
 
+function isValidPhoneNumber(phoneNumber: string) {
+  const regExp = /^[0-9]{11}$/;
+  return regExp.test(phoneNumber);
+}
+
 function determineCarrier(phoneNumber: string) {
   const prefix = phoneNumber.substring(0, 3);
   if (mobilePrefixes.has(prefix)) {
@@ -43,6 +50,12 @@ function determineCarrier(phoneNumber: string) {
 }
 
 function fetchPhoneInfo() {
+  if(!isValidPhoneNumber(phoneNumber.value)){
+    isPhoneValid.value = false;
+    infoVisible.value = true;
+    return;
+  }
+  isLoading.value = true;
   infoVisible.value = true;
   phoneInfo.value.carrier = determineCarrier(phoneNumber.value);
   axios.get(URL, {params: {phoneNumber: phoneNumber.value}})
@@ -50,9 +63,12 @@ function fetchPhoneInfo() {
         phoneInfo.value.city = response.data.city;
         phoneInfo.value.prov = response.data.prov;
       })
-      .catch(error => {
-        console.error("There was an error fetching the phone info: ", error);
-      });
+      .catch(() => {
+        
+      })
+      .finally(() => {
+        isLoading.value = false;
+      })
 }
 </script>
 
@@ -82,9 +98,9 @@ function fetchPhoneInfo() {
     </el-button>
   </div>
 
-  <div v-if="infoVisible">
+  <div v-if="infoVisible" v-loading="isLoading">
     <el-alert
-        v-if="!phoneInfo.city"
+        v-if="!isPhoneValid || !phoneInfo.city"
         title="查询失败，请检查输入的手机号码是否正确"
         type="error"
         effect="dark"
