@@ -64,7 +64,6 @@ function fetchPhoneInfo() {
         phoneInfo.value.prov = response.data.prov;
       })
       .catch(() => {
-        
       })
       .finally(() => {
         isLoading.value = false;

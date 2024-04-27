@@ -61,3 +61,4 @@ implementation group: 'com.alibaba.fastjson2', name: 'fastjson2', version: '2.0.
 
 ## 运行环境
 
+`Node.js` 版本需要 ≥ `18.3` ，`Gradle` 安装版本为 `8.7`  
